@@ -5,11 +5,10 @@
 
 (** ly(x^128 + x^7 + x^2 + x + 1 corrsponds to 1 +2 +4 + 128 =125, GF(2))*)
 
-external init : unit -> unit = "integers_unsigned_init"
 
 open Stdint
 
-let () = init ()
+
 
 let mult_rij a b =
   let a, b = if a < b then (a, b) else (b, a) in

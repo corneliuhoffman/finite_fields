@@ -1,6 +1,6 @@
 (lang dune 3.1)
 
-(name finite_fileds)
+(name finite_fields)
 
 (generate_opam_files true)
 
@@ -16,7 +16,7 @@
 (documentation https://url/to/documentation)
 
 (package
- (name finite_fileds)
+ (name finite_fields)
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends ocaml dune)

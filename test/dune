@@ -1,6 +1,6 @@
 (executable
  (name test_finite_fields)
- (libraries finite_fields alcotest qcheck-alcotest))
+ (libraries finite_fields stdint alcotest qcheck-alcotest))
 
 (rule
  (alias runtest)
