@@ -1,3 +1,8 @@
 (library
- (public_name finite_fileds)
- (name finite_fileds))
+ (public_name finite_fields)
+ (name finite_fields)
+ (install_c_headers ocaml_integers)
+ (foreign_stubs
+  (language c)
+  (names unsigned_stubs))
+ (libraries zarith stdint benchmark))

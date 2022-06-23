@@ -1,2 +1,8 @@
-(test
- (name finite_fileds))
+(executable
+ (name test_finite_fields)
+ (libraries finite_fields alcotest qcheck-alcotest))
+
+(rule
+ (alias runtest)
+ (action
+  (run %{dep:./test_finite_fields.exe})))
