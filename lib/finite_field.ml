@@ -5,10 +5,7 @@
 
 (** ly(x^128 + x^7 + x^2 + x + 1 corrsponds to 1 +2 +4 + 128 =125, GF(2))*)
 
-
 open Stdint
-
-
 
 let mult_rij a b =
   let a, b = if a < b then (a, b) else (b, a) in
@@ -35,12 +32,13 @@ let mult_rij128 a b =
     else if a = Uint128.one then Uint128.logxor b acc
     else
       let new_acc =
-        if Uint128.(rem a @@ of_int 2) = Uint128.one then Uint128.logxor acc b
+        if Uint128.(logand a @@ one) = Uint128.one then Uint128.logxor acc b
         else acc
       in
       let new_b = Uint128.shift_left b 1 in
       let new_a = Uint128.shift_right a 1 in
-      if Uint128.shift_right new_b 1 = b then aux new_acc new_a new_b
+      if Uint128.shift_right new_b 127 = Uint128.one then
+        aux new_acc new_a new_b
       else
         let new_b = Uint128.logxor new_b shift in
         aux new_acc new_a new_b
@@ -59,6 +57,10 @@ let square_rij128 a = mult_rij128 a a
        aux new_acc new_n new_a
    in
    aux Uint128.one Uint128.max_int a *)
+
+let div_by_power n a =
+  let x = Uint128.(pred (shift_left one n)) in
+  Uint128.logand a x = Uint128.zero
 
 let add_f g =
   let shift = Uint128.of_int 135 in
@@ -249,6 +251,75 @@ let mult128 (a1, a2) (b1, b2) =
   let left = (rest lxor a2b2) lsl 32 in
   let right = a2b2 lxor mult_by_x 32 a1b1 in
   (left, right)
+
+let w i x =
+  let rec aux acc k x =
+    if k = Uint128.shift_left Uint128.one i then acc
+    else
+      let new_acc = mult_rij128 acc (Uint128.logxor x k) in
+      aux new_acc (Uint128.succ k) x
+  in
+  aux Uint128.one Uint128.zero x
+
+let precompute_coef n l =
+  let h = 1 lsl n in
+  let table = Hashtbl.create (h * n) in
+  for i = 0 to n - 1 do
+    let wi = inv_rij128 @@ w i (Uint128.shift_left Uint128.one i) in
+    let wl = w i l in
+    for c = 0 to (h lsr i) - 1 do
+      Hashtbl.add
+        table
+        (i, Uint128.of_int (c lsl i))
+        (mult_rij128 wi (Uint128.logxor wl @@ w i (Uint128.of_int (c lsl i))))
+    done
+  done ;
+  table
+
+let rec delta logh i m c l d coefs mem =
+  (* let h = Uint128.shift_left Uint128.one logh in *)
+  assert (m < 1 lsl (i + 1)) ;
+  assert (div_by_power i c) ;
+  (* Format.printf "i = %i; m=%i; c = %s\n" i m (Uint128.to_string c) ; *)
+  (* assert (Uint128.compare c h < 0) ; *)
+  try Hashtbl.find mem (i, m, c)
+  with _ ->
+    if i = logh then (
+      Hashtbl.add mem (i, m, c) d.(m) ;
+      d.(m))
+    else if div_by_power (i + 1) c then (
+      let left = delta logh (i + 1) m c l d coefs mem in
+      let right = delta logh (i + 1) (m lsl i) c l d coefs mem in
+      let coeficient = Hashtbl.find coefs (i, c) in
+      let result = Uint128.logxor left @@ mult_rij128 coeficient right in
+      Hashtbl.add mem (i, m, c) result ;
+      result)
+    else
+      let left =
+        delta
+          logh
+          i
+          m
+          (Uint128.logxor c (Uint128.shift_left Uint128.one i))
+          l
+          d
+          coefs
+          mem
+      in
+      let right =
+        delta
+          logh
+          (i + 1)
+          (m lsl i)
+          (Uint128.logxor c (Uint128.shift_left Uint128.one i))
+          l
+          d
+          coefs
+          mem
+      in
+      let result = Uint128.logxor left right in
+      Hashtbl.add mem (i, m, c) result ;
+      result
 
 (* module type S = sig
      type t
