@@ -3,7 +3,7 @@
 
 (** 𝑥^8+𝑥^4+𝑥^3+𝑥+1 coresponds with 27 1 + 2 + 8 + 16 =*)
 
-(** ly(x^128 + x^7 + x^2 + x + 1 corrsponds to 1 +2 +4 + 128 =125, GF(2))*)
+(** ly(x^128 + x^7 + x^2 + x + 1 corrsponds to 1 +2 +4 + 128 =135, GF(2))*)
 
 open Stdint
 
@@ -321,29 +321,115 @@ let rec delta logh i m c l d coefs mem =
       Hashtbl.add mem (i, m, c) result ;
       result
 
-(* module type S = sig
-     type t
+module type S = sig
+  type t = Uint128.t
 
-     val field_size : int
+  val l_for_fft : t
 
-     val of_string : string -> t
+  val one : t
 
-     val to_string : t -> string
+  val zero : t
 
-     val mult_by_x : t -> t
+  val shift_left : t -> int -> t
 
-     val mult : t -> t -> t
+  val shift_right : t -> int -> t
 
-     val square : t -> t
+  val of_int : int -> t
 
-     val add : t -> t -> t
+  val to_string : t -> string
 
-     val inv : t -> t
+  val mult : t -> t -> t
 
-     val omega t
-   end
+  val square : t -> t
 
-   module Rij : S = struct
+  val add : t -> t -> t
+
+  val inv : t -> t
+end
+
+module Make (Field : S) : sig
+  include S with type t = Uint128.t
+
+  val fft : t array -> t array
+
+  val ffti : t array -> t array
+end = struct
+  include Field
+
+  let div_by_power n a = shift_left (shift_right a n) n = a
+
+  (** produce the element $\omega_i$*)
+
+  (** this computes the subspace polinomials $W_i(x)= \prod_{i=0}{2^i}(x-i) *)
+
+  (** this precomputes a hash table that cntains at position (i c) the value $
+      $W_i(c +l)/W_i(2^i)$*)
+  let precomp_coef = precompute_coef 20 l_for_fft
+
+  let rec delta logh i m c l d coefs mem =
+    (* let h = Uint128.shift_left Uint128.one logh in *)
+    (* assert (m < 1 lsl (i + 1)) ;
+       assert (div_by_power i c) ; *)
+    (* Format.printf "i = %i; m=%i; c = %s\n" i m (Uint128.to_string c) ; *)
+    (* assert (Uint128.compare c h < 0) ; *)
+    try Hashtbl.find mem (i, m, c)
+    with _ ->
+      if i = logh then (
+        Hashtbl.add mem (i, m, c) d.(m) ;
+        d.(m))
+      else if div_by_power (i + 1) c then (
+        let left = delta logh (i + 1) m c l d coefs mem in
+        let right = delta logh (i + 1) (m lsl i) c l d coefs mem in
+        let coeficient = Hashtbl.find coefs (i, c) in
+        let result = add left @@ mult coeficient right in
+        Hashtbl.add mem (i, m, c) result ;
+        result)
+      else
+        let left = delta logh i m (add c (shift_left one i)) l d coefs mem in
+        let right =
+          delta logh (i + 1) (m lsl i) (add c (shift_left one i)) l d coefs mem
+        in
+        let result = add left right in
+        Hashtbl.add mem (i, m, c) result ;
+        result
+
+  let fft d =
+    let logh = Z.log2up (Z.of_int (Array.length d)) in
+    let mem = Hashtbl.create 500000 in
+    Array.init (1 lsl logh) (fun x ->
+        let c = of_int x in
+        delta logh 0 0 c l_for_fft d precomp_coef mem)
+
+  let ffti _ = assert false
+end
+
+module Fi128 = Make (struct
+  type t = Uint128.t
+
+  let l_for_fft = Uint128.of_int 124
+
+  let mult = mult_rij128
+
+  let inv = inv_rij128
+
+  let zero = Uint128.zero
+
+  let one = Uint128.one
+
+  let shift_left = Uint128.shift_left
+
+  let shift_right = Uint128.shift_right
+
+  let add = Uint128.logxor
+
+  let square x = mult x x
+
+  let of_int = Uint128.of_int
+
+  let to_string = Uint128.to_string
+end)
+
+(* module Rij : S = struct
      type t = int
 
      let field_size = 8
@@ -365,54 +451,4 @@ let rec delta logh i m c l d coefs mem =
 
      let inv a = assert (a <>0 ); Hashtbl.find table a
      let omega = omega_rij
-   end
-
-   module Double (M : S) : S = struct
-     type t = M.t * M.t
-
-     let field_size = 2 * M.field_size
-
-     let of_string s =
-       let z = Z.of_string s in
-       assert (Z.log2 z < field_size) ;
-       let a = Z.(z asr M.field_size) in
-       let b = Z.(z lxor (a lsl M.field_size)) in
-       let str_a = Z.to_string a in
-       let str_b = Z.to_string b in
-       (M.of_string str_a, M.of_string str_b)
-
-     let to_string (a, b) = M.to_string a ^ "," ^ M.to_string b
-
-     let mult_by_x (a, b) = (M.add b b, M.mult_by_x a)
-
-     let mult (a1, b1) (a2, b2) =
-       let a1b1 = M.mult a1 b1 in
-       let a2b2 = M.mult a2 b2 in
-       let rest = M.mult (M.add a1 a2) (M.add b1 b2) in
-       let left = M.add rest a2b2 in
-       let right = M.add a2b2 @@ M.mult_by_x a1b1 in
-       (left, right)
-
-     let vals = List.init field_size (fun i - let (a,b) = )
-
-     let square a = mult a a
-
-     let add (a1, b1) (a2, b2) = (M.add a1 a2, M.add b1 b2)
-
-     let inv (a, b) =
-       let a2 = M.square a in
-       let b2 = M.square b in
-       let ab = M.mult a b in
-       let w = M.add (M.mult_by_x a2) (M.add b2 ab) in
-
-       let s = M.inv w in
-       let left = M.mult a s in
-       let right = M.mult (M.add a b) s in
-       (left, right)
-   end
-
-   module FInt16 = Make (struct
-     let n = 16
-   end)
-
-   module FInt32 = Double (FInt16) *)
+   end *)
