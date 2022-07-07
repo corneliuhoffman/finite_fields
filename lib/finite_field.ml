@@ -364,13 +364,13 @@ end = struct
 
   (** this precomputes a hash table that cntains at position (i c) the value $
       $W_i(c +l)/W_i(2^i)$*)
-  let precomp_coef = precompute_coef 20 l_for_fft
+  let precomp_coef = precompute_coef 16 l_for_fft
 
   let rec delta logh i m c l d coefs mem =
     (* let h = Uint128.shift_left Uint128.one logh in *)
     (* assert (m < 1 lsl (i + 1)) ;
        assert (div_by_power i c) ; *)
-    (* Format.printf "i = %i; m=%i; c = %s\n" i m (Uint128.to_string c) ; *)
+    
     (* assert (Uint128.compare c h < 0) ; *)
     try Hashtbl.find mem (i, m, c)
     with _ ->
@@ -379,28 +379,72 @@ end = struct
         d.(m))
       else if div_by_power (i + 1) c then (
         let left = delta logh (i + 1) m c l d coefs mem in
-        let right = delta logh (i + 1) (m lsl i) c l d coefs mem in
+        let right = delta logh (i + 1) (m + (1 lsl i)) c l d coefs mem in
         let coeficient = Hashtbl.find coefs (i, c) in
         let result = add left @@ mult coeficient right in
+
         Hashtbl.add mem (i, m, c) result ;
         result)
       else
         let left = delta logh i m (add c (shift_left one i)) l d coefs mem in
         let right =
-          delta logh (i + 1) (m lsl i) (add c (shift_left one i)) l d coefs mem
+          delta logh (i + 1) (m + (1 lsl i)) (add c (shift_left one i)) l d coefs mem
         in
         let result = add left right in
         Hashtbl.add mem (i, m, c) result ;
         result
 
+  let rec rev_delta logh i m c l d coefs mem =
+  if  i=1 && m =1 then Format.printf " here i = %i; m =%i c= %i\n" i m @@ Uint128.to_int c;
+    match (i,m) with
+    | (0,0) ->d.(Uint128.to_int c)
+    
+    |_ ->
+          try (let x = Hashtbl.find mem (i, m, c) in
+x
+          )
+    with _ ->
+      if c= zero then rev_delta logh 0 m c l d coefs mem 
+      else
+      if (div_by_power (i-1)  c) then
+           (   
+        let left = rev_delta logh (i-1) (m - (1 lsl (i-1))) (add c (shift_left one (i-1))) l d coefs mem in
+        let right =
+          rev_delta logh (i - 1) (m - (1 lsl (i-1))) (add c (shift_left one (i-1))) l d coefs mem
+        in
+        let result = add left right in
+        Hashtbl.add mem (i, m, c) result ;
+        result)
+       
+      else
+        (        
+
+let left = rev_delta logh (i - 1) m c l d coefs mem in 
+       let right = rev_delta logh i (m + (1 lsl (i-1))) c l d coefs mem in
+       let coeficient = Hashtbl.find coefs (i-1, c) in
+       let result = add left @@ mult coeficient right in
+        Hashtbl.add mem (i, m, c) result ;
+        result)
+        
+
+       
+
+
+
   let fft d =
     let logh = Z.log2up (Z.of_int (Array.length d)) in
     let mem = Hashtbl.create 500000 in
     Array.init (1 lsl logh) (fun x ->
+      
         let c = of_int x in
         delta logh 0 0 c l_for_fft d precomp_coef mem)
 
-  let ffti _ = assert false
+  let ffti d = let logh = Z.log2up (Z.of_int (Array.length d)) in
+    let mem = Hashtbl.create 500000 in
+    Array.init (1 lsl logh) (fun x ->
+      Format.printf "\n\nnox x = %i" x;
+        
+        rev_delta logh logh x (of_int x) l_for_fft d precomp_coef mem)
 end
 
 module Fi128 = Make (struct
