@@ -1,4 +1,0 @@
-(library
- (public_name finite_fields)
- (name finite_fields)
- (libraries zarith stdint benchmark))

@@ -1,0 +1,30 @@
+cargo:rerun-if-file-changed=sys/ocaml-sys.c
+cargo:rerun-if-env-changed=OCAMLOPT
+cargo:rerun-if-env-changed=OCAML_VERSION
+cargo:rerun-if-env-changed=OCAML_WHERE_PATH
+TARGET = Some("x86_64-unknown-linux-gnu")
+OPT_LEVEL = Some("0")
+HOST = Some("x86_64-unknown-linux-gnu")
+CC_x86_64-unknown-linux-gnu = None
+CC_x86_64_unknown_linux_gnu = None
+HOST_CC = None
+CC = None
+CFLAGS_x86_64-unknown-linux-gnu = None
+CFLAGS_x86_64_unknown_linux_gnu = None
+HOST_CFLAGS = None
+CFLAGS = None
+CRATE_CC_NO_DEFAULTS = None
+DEBUG = Some("true")
+running: "cc" "-O0" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-static" "-I" "/usr/lib/ocaml" "-Wall" "-Wextra" "-o" "/root/finite_fields/target/debug/build/ocaml-sys-e06351e87186c8a0/out/src/ocaml-sys.o" "-c" "src/ocaml-sys.c"
+exit status: 0
+AR_x86_64-unknown-linux-gnu = None
+AR_x86_64_unknown_linux_gnu = None
+HOST_AR = None
+AR = None
+running: "ar" "cq" "/root/finite_fields/target/debug/build/ocaml-sys-e06351e87186c8a0/out/libocaml-sys.a" "/root/finite_fields/target/debug/build/ocaml-sys-e06351e87186c8a0/out/src/ocaml-sys.o"
+exit status: 0
+running: "ar" "s" "/root/finite_fields/target/debug/build/ocaml-sys-e06351e87186c8a0/out/libocaml-sys.a"
+exit status: 0
+cargo:rustc-link-lib=static=ocaml-sys
+cargo:rustc-link-search=native=/root/finite_fields/target/debug/build/ocaml-sys-e06351e87186c8a0/out
+cargo:rustc-link-lib=static=ocaml-sys

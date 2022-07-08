@@ -1,5 +1,5 @@
 open Finite_fields.Finite_field
-
+(* 
 
 
 let () =
@@ -18,6 +18,11 @@ Format.printf "donesetup ";
   let _ = Benchmark.throughput1 10 (fun (a, b) -> mult_rij128 a b) (a, c) in
   let _ = Benchmark.throughput1 10 (fun a -> inv_rij128 a) a in *)
   (* let _ = Benchmark.throughput1 10 (fun _ ->  let _ = Fi128.fft d in ()) () in *)
-let _ = Fi128.ffti d in
+let d1 = Fi128.ffti d in
+assert (d = Fi128.fft d1);
   (* let _ = Benchmark.throughput1 10 (fun a -> inv 64 a) 100080340 in *)
-  ()
+  () *)
+let ()=
+ (* let _ =  *)
+ 
+Format.printf "mul = %Li" @@ mulasm 2L 3L 4L 1L 

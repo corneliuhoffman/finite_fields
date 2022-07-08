@@ -1,0 +1,23 @@
+(library
+ (public_name finite_fields)
+ (name finite_fields)
+ (libraries zarith stdint benchmark lib)
+ (modules Finite_field))
+
+(rule
+ (targets liblib.a)
+ (deps
+  (glob_files *.rs))
+ (action
+  (progn
+   (run cargo build --target-dir %{project_root}/../../target --release)
+   (run mv %{project_root}/../../target/release/liblib.a liblib.a))))
+
+(library
+ (name lib)
+ (libraries benchmark stdint zarith)
+ (public_name lib)
+ (foreign_archives lib)
+ (c_library_flags
+  (-lpthread -lc -lm))
+ (modules Lib))

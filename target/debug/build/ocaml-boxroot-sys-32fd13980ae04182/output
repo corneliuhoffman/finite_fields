@@ -1,0 +1,64 @@
+cargo:rerun-if-changed=vendor/boxroot/boxroot.c
+cargo:rerun-if-changed=vendor/boxroot/boxroot.h
+cargo:rerun-if-env-changed=OCAMLOPT
+cargo:rerun-if-env-changed=OCAML_WHERE_PATH
+TARGET = Some("x86_64-unknown-linux-gnu")
+OPT_LEVEL = Some("0")
+HOST = Some("x86_64-unknown-linux-gnu")
+CC_x86_64-unknown-linux-gnu = None
+CC_x86_64_unknown_linux_gnu = None
+HOST_CC = None
+CC = None
+CFLAGS_x86_64-unknown-linux-gnu = None
+CFLAGS_x86_64_unknown_linux_gnu = None
+HOST_CFLAGS = None
+CFLAGS = None
+CRATE_CC_NO_DEFAULTS = None
+DEBUG = Some("true")
+CARGO_CFG_TARGET_FEATURE = Some("fxsr,sse,sse2")
+running: "cc" "-O0" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "/usr/lib/ocaml" "-I" "vendor/boxroot/" "-Wall" "-Wextra" "-o" "/root/finite_fields/target/debug/build/ocaml-boxroot-sys-32fd13980ae04182/out/vendor/boxroot/boxroot.o" "-c" "vendor/boxroot/boxroot.c"
+cargo:warning=vendor/boxroot/boxroot.c: In function ‘pool_remove’:
+cargo:warning=vendor/boxroot/boxroot.c:360:31: warning: unused variable ‘cl’ [-Wunused-variable]
+cargo:warning=  360 |   FOREACH_GLOBAL_RING(global, cl, {
+cargo:warning=      |                               ^~
+cargo:warning=vendor/boxroot/boxroot.c:164:13: note: in definition of macro ‘FOREACH_GLOBAL_RING’
+cargo:warning=  164 |       class cl = global_ring_classes[b__i - b__st];                     \
+cargo:warning=      |             ^~
+cargo:warning=vendor/boxroot/boxroot.c: In function ‘free_all_chunks’:
+cargo:warning=vendor/boxroot/boxroot.c:375:31: warning: unused variable ‘cl’ [-Wunused-variable]
+cargo:warning=  375 |   FOREACH_GLOBAL_RING(global, cl, { *global = NULL; });
+cargo:warning=      |                               ^~
+cargo:warning=vendor/boxroot/boxroot.c:164:13: note: in definition of macro ‘FOREACH_GLOBAL_RING’
+cargo:warning=  164 |       class cl = global_ring_classes[b__i - b__st];                     \
+cargo:warning=      |             ^~
+cargo:warning=vendor/boxroot/boxroot.c: In function ‘promotion_occupancy’:
+cargo:warning=vendor/boxroot/boxroot.c:521:17: warning: comparison of integer expressions of different signedness: ‘int’ and ‘long unsigned int’ [-Wsign-compare]
+cargo:warning=  521 |   if (threshold <= LOW_COUNT_THRESHOLD) return LOW;
+cargo:warning=      |                 ^~
+cargo:warning=vendor/boxroot/boxroot.c:522:17: warning: comparison of integer expressions of different signedness: ‘int’ and ‘long unsigned int’ [-Wsign-compare]
+cargo:warning=  522 |   if (threshold <= HIGH_COUNT_THRESHOLD) return HIGH;
+cargo:warning=      |                 ^~
+cargo:warning=vendor/boxroot/boxroot.c: In function ‘pool_reclassify’:
+cargo:warning=vendor/boxroot/boxroot.c:544:3: warning: enumeration value ‘NO_CHANGE’ not handled in switch [-Wswitch]
+cargo:warning=  544 |   switch (occ) {
+cargo:warning=      |   ^~~~~~
+cargo:warning=vendor/boxroot/boxroot.c: In function ‘boxroot_setup’:
+cargo:warning=vendor/boxroot/boxroot.c:1043:31: warning: unused variable ‘cl’ [-Wunused-variable]
+cargo:warning= 1043 |   FOREACH_GLOBAL_RING(global, cl, { *global = NULL; });
+cargo:warning=      |                               ^~
+cargo:warning=vendor/boxroot/boxroot.c:164:13: note: in definition of macro ‘FOREACH_GLOBAL_RING’
+cargo:warning=  164 |       class cl = global_ring_classes[b__i - b__st];                     \
+cargo:warning=      |             ^~
+exit status: 0
+AR_x86_64-unknown-linux-gnu = None
+AR_x86_64_unknown_linux_gnu = None
+HOST_AR = None
+AR = None
+running: "ar" "cq" "/root/finite_fields/target/debug/build/ocaml-boxroot-sys-32fd13980ae04182/out/libocaml-boxroot.a" "/root/finite_fields/target/debug/build/ocaml-boxroot-sys-32fd13980ae04182/out/vendor/boxroot/boxroot.o"
+exit status: 0
+running: "ar" "s" "/root/finite_fields/target/debug/build/ocaml-boxroot-sys-32fd13980ae04182/out/libocaml-boxroot.a"
+exit status: 0
+cargo:rustc-link-lib=static=ocaml-boxroot
+cargo:rustc-link-search=native=/root/finite_fields/target/debug/build/ocaml-boxroot-sys-32fd13980ae04182/out
+cargo:rustc-link-search=/root/finite_fields/target/debug/build/ocaml-boxroot-sys-32fd13980ae04182/out
+cargo:rustc-link-lib=static=ocaml-boxroot
