@@ -7,13 +7,11 @@
 
 (* open Lib  *)
 
-
 open Stdint
 
-
-
-  let multiplication a b c d   = let (x,y) = Lib.multiplication a b c d  in
- (Int64.to_string x ^","^ Int64.to_string y)
+let multiplication a b c d =
+  let x, y = Lib.multiplication a b c d in
+  Int64.to_string x ^ "," ^ Int64.to_string y
 
 let mult_rij a b =
   let a, b = if a < b then (a, b) else (b, a) in
@@ -462,7 +460,6 @@ end = struct
     let logh = Z.log2up (Z.of_int (Array.length d)) in
     let mem = Hashtbl.create 500000 in
     Array.init (1 lsl logh) (fun x ->
-      
         let c = of_int x in
         delta logh 0 0 c l_for_fft d coef mem)
 
