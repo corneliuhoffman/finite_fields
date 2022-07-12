@@ -6,9 +6,14 @@
 (** ly(x^128 + x^7 + x^2 + x + 1 corrsponds to 1 +2 +4 + 128 =135, GF(2))*)
 
 (* open Lib  *)
-let mulasm a b c d = Lib.mul a b c d
+
 
 open Stdint
+
+
+
+  let multiplication a b c d   = let (x,y) = Lib.multiplication a b c d  in
+ (Int64.to_string x ^","^ Int64.to_string y)
 
 let mult_rij a b =
   let a, b = if a < b then (a, b) else (b, a) in

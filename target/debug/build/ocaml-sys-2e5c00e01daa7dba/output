@@ -1,3 +1,0 @@
-cargo:rerun-if-env-changed=OCAMLOPT
-cargo:rerun-if-env-changed=OCAML_VERSION
-cargo:rerun-if-env-changed=OCAML_WHERE_PATH
