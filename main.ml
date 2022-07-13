@@ -19,9 +19,15 @@ let d = Array.init (1 lsl 16) (fun _ -> gen ()) in
   (* let _ = Benchmark.throughput1 10 (fun _ ->  let _ = Fi128.ffti d in ()) () in *)
 let d1 = Fi128.ffti d in
 Format.printf "%b" (d = (Fi128.fft d1)); *)
-let z= (Int64.shift_left 1L 63) in
- let _ = Benchmark.throughput1 10 (fun () -> multiplication z 2L z 67L ) () in
+(* let z= (Int64.shift_left 1L 63) in
+ let _ = Benchmark.throughput1 10 (fun () -> multiplication (z, 2L) (z, 67L) ) () in
  let a = Stdint.Uint128.(logxor (of_int64 2L) (shift_left one 127)) in
   let c =  Stdint.Uint128.(logxor (of_int64 67L )(shift_left one 127))in
-let _ = Benchmark.throughput1 10 (fun (a, b) -> mult_rij128 a b) (a, c) in ()
+let _ = Benchmark.throughput1 10 (fun (a, b) -> mult_rij128 a b) (a, c) in (); *)
+ let (a,b) = multiplication (0L, 2L) (Int64.shift_left 1L 63, 67L) in
+
+
+ 
+ Format.printf "%Li; %Li; \n" a b 
+
 

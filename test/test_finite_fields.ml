@@ -1,17 +1,30 @@
 open Finite_fields.Finite_field
 open QCheck2
 
-let i128gen = Gen.map (fun a -> Stdint.Uint128.of_int64 a) Gen.int64
-
+let i128gen =  Gen.map2 (fun a b -> (a,b)) Gen.int64 Gen.int64
+ 
+  (* Gen.map (fun a -> Stdint.Uint128.of_int64 a) Gen.int64 *)
+let i128print = fun (a,b) -> Int64.to_string a ^ "; " ^ Int64.to_string b
+(* 
 let test_assoc =
   Test.make
     ~name:"GF128_associativity"
+    ~print:Print.(triple i128print i128print i128print)
     Gen.(triple i128gen i128gen i128gen)
     (fun (a, b, c) ->
       let left = mult_rij128 (mult_rij128 a b) c in
       let right = mult_rij128 a (mult_rij128 b c) in
+      left = right) *)
+let test_assoc =
+  Test.make
+    ~name:"GF128_associativity"
+    ~print:Print.(triple i128print i128print i128print)
+    Gen.(triple i128gen i128gen i128gen)
+    (fun (a, b, c) ->
+      let left = multiplication (multiplication a b) c in
+      let right = multiplication a (multiplication b c) in
       left = right)
-
+(* 
 let test_distr =
   Test.make
     ~name:"GF128distrib"
@@ -47,11 +60,13 @@ let test_inv =
           "a= %s; inv=%s\n"
           (Stdint.Uint128.to_string @@ a)
           (Stdint.Uint128.to_string @@ inv) ;
-      Stdint.Uint128.one = mult_rij128 a inv)
+      Stdint.Uint128.one = mult_rij128 a inv) *)
 
 let tests =
   List.map
     QCheck_alcotest.to_alcotest
-    [test_assoc; test_distr; test_ident; test_com; test_inv]
+    [test_assoc; 
+    (* test_distr; test_ident; test_com; test_inv *)
+    ]
 
 let () = Alcotest.run "field" [("generic_field", tests)]

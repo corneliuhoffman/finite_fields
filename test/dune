@@ -1,17 +1,17 @@
-; (executable
-;  (name test_finite_fields)
-;  (libraries finite_fields stdint alcotest qcheck-alcotest))
-
-; (rule
-;  (alias runtest)
-;  (action
-;   (run %{dep:./test_finite_fields.exe})))
-
 (executable
- (name asm_test)
- (libraries lib stdint benchmark finite_fields))
+ (name test_finite_fields)
+ (libraries finite_fields stdint alcotest qcheck-alcotest))
 
 (rule
  (alias runtest)
  (action
-  (run ./asm_test.exe)))
+  (run %{dep:./test_finite_fields.exe})))
+
+; (executable
+;  (name asm_test)
+;  (libraries lib stdint benchmark finite_fields))
+
+; (rule
+;  (alias runtest)
+;  (action
+;   (run ./asm_test.exe)))

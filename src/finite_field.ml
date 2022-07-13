@@ -9,9 +9,9 @@
 
 open Stdint
 
-let multiplication a b c d =
+let multiplication (a, b) (c, d) =
   let x, y = Lib.multiplication a b c d in
-  Int64.to_string x ^ "," ^ Int64.to_string y
+  (x,y)
 
 let mult_rij a b =
   let a, b = if a < b then (a, b) else (b, a) in
