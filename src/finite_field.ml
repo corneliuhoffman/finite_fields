@@ -8,10 +8,22 @@
 (* open Lib  *)
 
 open Stdint
+let one =(0L,1L)
+let zero=(0L,0L)
 
+let to_string (a,b) = Format.sprintf "%Li, %Li" a b
 let multiplication (a, b) (c, d) =
   let x, y = Lib.multiplication a b c d in
   (x,y)
+
+let addition (a, b) (c, d) =
+  let x, y = Lib.addition a b c d in
+  (x,y)
+
+let inverse (a, b) =
+  let x, y = Lib.inverse a b  in
+  (x,y)
+
 
 let mult_rij a b =
   let a, b = if a < b then (a, b) else (b, a) in
@@ -28,6 +40,119 @@ let mult_rij a b =
         aux new_acc new_a new_b
   in
   aux 0 a b
+
+
+
+  let subspace_poly i x =
+  let rec aux acc k x =
+    if k = Int64.shift_left 1L i then acc
+    else
+      let new_acc = multiplication acc (addition x (0L, k)) in
+      aux new_acc (Int64.succ k) x
+  in
+  aux one 0L x
+
+let precompute_coeff n l =
+  let h = 1 lsl n in
+  let table = Hashtbl.create (h * n) in
+  for i = 0 to n - 1 do
+    let wi = inverse @@ subspace_poly i (0L, (Int64.shift_left 1L i)) in
+    let wl = subspace_poly i l in
+    for c = 0 to (h lsr i) - 1 do
+      Hashtbl.add
+        table
+        (i,(0L, Int64.of_int (c lsl i)))
+        (multiplication wi (addition wl @@ subspace_poly i (0L, (Int64.of_int (c lsl i)))))
+    done
+  done ;
+  table
+
+let table_of_coef = precompute_coeff 20 (0L,124L)
+
+
+let div_by_power n (_,a) =
+  let x = Int64.(pred (shift_left one n)) in
+ Int64.logand a x = 0L
+
+  let rec delta logh i m c l d coefs  =
+
+      if i = logh then (
+        d.(m))
+      else if div_by_power (i + 1) c then (
+        let left = delta logh (i + 1) m c l d coefs  in
+        let right = delta logh (i + 1) (m + (1 lsl i)) c l d coefs  in
+        let coeficient = Hashtbl.find coefs (i, c) in
+        let result = addition left @@ multiplication coeficient right in
+
+        result)
+      else
+        let left = delta logh i m (addition c (0L, (Int64.shift_left 1L i))) l d coefs  in
+        let right =
+          delta
+            logh
+            (i + 1)
+            (m + (1 lsl i))
+            (addition c (0L,(Int64.shift_left 1L i)))
+            l
+            d
+            coefs
+        in
+        let result = addition left right in
+        result
+
+  (* let rec rev_delta logh i m c l d coefs mem =
+    match (i, m) with
+    | 0, 0 -> d.(Uint128.to_int c)
+    | _ ->
+        if Hashtbl.mem mem (i, m, c) then Hashtbl.find mem (i, m, c)
+          (* else if c = l then rev_delta logh 0 m c l d coefs mem *)
+        else if m >= 1 lsl (i - 1) then (
+          let left =
+            rev_delta logh (i - 1) (m - (1 lsl (i - 1))) c l d coefs mem
+          in
+          let right =
+            rev_delta
+              logh
+              (i - 1)
+              (m - (1 lsl (i - 1)))
+              (add c (shift_left one (i - 1)))
+              l
+              d
+              coefs
+              mem
+          in
+          let result = add left right in
+          Hashtbl.add mem (i, m, c) result ;
+          result)
+        else
+          let left = rev_delta logh (i - 1) m c l d coefs mem in
+
+          let right = rev_delta logh i (m + (1 lsl (i - 1))) c l d coefs mem in
+          let coeficient =
+            if add c l < shift_left one (i - 1) then zero
+            else Hashtbl.find coefs (i - 1, c)
+          in
+          let result = add left @@ mult coeficient right in
+          Hashtbl.add mem (i, m, c) result ;
+          result *)
+
+  let fft d =
+    let logh = Z.log2up (Z.of_int (Array.length d)) in
+    Array.init (1 lsl logh) (fun x ->
+        let c = (0L, Int64.of_int x) in
+        delta logh 0 0 c 124L d table_of_coef)
+
+
+
+
+
+
+
+
+
+
+
+
 
 (** TODO: use sliding windows*)
 let mult_rij128 a b =

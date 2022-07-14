@@ -7,3 +7,5 @@ open! Bigarray
 external mul: int64 -> int64-> int64-> int64  -> (int64 * int64) = "mul"
 external mulbyshift: int64 -> int64-> (int64 * int64) = "mulbyshift"
 external multiplication: int64 -> int64->int64->int64-> (int64 * int64) = "multiplication"
+external inverse: int64 -> int64-> (int64 * int64) = "inverse"
+external addition: int64 -> int64->int64->int64-> (int64 * int64) = "addition"

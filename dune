@@ -1,3 +1,5 @@
 (executable
  (name main)
+ (public_name main)
+ (package main)
  (libraries finite_fields lib qcheck-core qcheck-alcotest benchmark))
