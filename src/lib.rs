@@ -166,8 +166,13 @@ pub fn inv(x) -> __m128i
 
             (true, _) => {let new_u = _mm_srli_epi64(u,1);
             let new_g1 = if odd(g1) {_mm_srli_epi64(g1,1)} else {addf(g1)};
-            
-        }
+            aux(new_u, v,new_g1,g2)}
+            (_,true) =>{let new_v = _mm_bsrli_si128(v,1);
+            let new_g2 = if odd(g2) {_mm_srli_epi64(g2,1)} else {addf(g2)};
+            aux(u, new_v,g1,new_g2)}
+            _ =>{
+                
+            }
             
         }
     }}
