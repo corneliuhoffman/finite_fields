@@ -11,6 +11,7 @@ use core::arch::x86_64::{
     __m128i, _mm_and_si128, _mm_bslli_si128, _mm_bsrli_si128, _mm_cvtsi64x_si128,
     _mm_extract_epi64, _mm_set_epi64x, _mm_xor_si128,
 };
+use std::arch::x86_64::_mm_srli_epi64;
 // use std::time::{ Instant};
 //  use std::ops::BitXor;
 //   use core::arch::x86_64:: _mm_cvtsi128_si64,;
@@ -121,6 +122,15 @@ pub fn odd(x: __m128i) -> bool {
     }
 }
 
+pub fn odd(x: __m128i, y:__m128i) -> bool{
+     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+   unsafe {let (a,b) = (_mm_extract_epi64(x,0),_mm_extract_epi64(x,1));
+   let (c,d) = (_mm_extract_epi64(y,0),_mm_extract_epi64(y,1));
+(a,b)==(c,d)}
+
+
+}
+
 pub fn reduce(a: __m128i, g1: __m128i, g2: __m128i) -> (__m128i, __m128i, __m128i, __m128i) {
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     unsafe {
@@ -144,3 +154,21 @@ pub fn reduce(a: __m128i, g1: __m128i, g2: __m128i) -> (__m128i, __m128i, __m128
         }
     }
 }
+
+pub fn inv(x) -> __m128i
+{ #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    unsafe {let one = _mm_cvtsi64x_si128(1);
+    let zero = _mm_cvtsi64x_si128(0);
+
+    fn aux (u: __m128i,v:__m128i, g1: __m128i, g2: __m128i)->__m128i
+    {
+        match (odd(u), off(v)) {
+
+            (true, _) => {let new_u = _mm_srli_epi64(u,1);
+            let new_g1 = if odd(g1) {_mm_srli_epi64(g1,1)} else {addf(g1)};
+            
+        }
+            
+        }
+    }}
+} 
