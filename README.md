@@ -39,4 +39,4 @@ The additive FFT is based on [this paper](https://arxiv.org/abs/1404.3458v2).
 
 Note that two of the three constructions only work on Intel machines that have the `_mm_clmulepi64_si128 ` instruction.
 
-`dune exex ./mainn.exe` will compute benchmarks and `dune exec test/test_finite_fields.exe` will test the field properties and the fact that `fft` and `ifft` are inverse to each other.
+`dune exec ./mainn.exe` will compute benchmarks and `dune exec test/test_finite_fields.exe` will test the field properties and the fact that `fft` and `ifft` are inverse to each other.
