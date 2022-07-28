@@ -76,7 +76,6 @@ end = struct
 
   let rec delta logh i m c l d coefs mem =
     if i = logh then (
-      Format.printf "m = %i\n" m ;
       Hashtbl.add mem (i, m, c) d.(m) ;
       d.(m))
     else if div_by_power (i + 1) c then (

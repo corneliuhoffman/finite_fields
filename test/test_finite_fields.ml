@@ -3,7 +3,6 @@ open QCheck2
 let i128gen =  Gen.map2 (fun a b -> (a,b)) Gen.int64 Gen.int64
  
 let noint128_gen = Gen.map (fun (a,b) -> Stdint.Uint128.(logxor (shift_left (of_int64 a) 64) (of_int64 b))) i128gen
-(* let i128print = Field128ASM.to_string *)
 let array_gen64 = Gen.array_size (Gen.return 16)   Gen.int64
 let array_gen128 = Gen.array_size (Gen.return 16)   i128gen
 let array_gen128noit = Gen.array_size (Gen.return 16)   noint128_gen
@@ -56,7 +55,7 @@ let test_inv (type a)(module F: S with type t = a) (gen:a Gen.t) =
 let test_fft128 = Test.make  ~name:"FFT128"
        
        array_gen128
-        (fun d-> Format.printf "size =%i" @@ Array.length d;let d1 = Int128FFT.fft d in
+        (fun d-> let d1 = Int128FFT.fft d in
         let d2 = Int128FFT.ifft d1 in
 
   d = d2)
@@ -64,14 +63,14 @@ let test_fft128 = Test.make  ~name:"FFT128"
   let test_fft64 = Test.make  ~name:"FFT64"
        
        array_gen64
-        (fun d-> Format.printf "size =%i" @@ Array.length d;let d1 = Int64FFT.fft d in
+        (fun d-> let d1 = Int64FFT.fft d in
         let d2 = Int64FFT.ifft d1 in
 
   d = d2)
   let test_fft128noint = Test.make  ~name:"no innntel FFT64"
        
        array_gen128noit
-        (fun d-> Format.printf "size =%i" @@ Array.length d;let d1 = No_int_FFT.fft d in
+        (fun d-> let d1 = No_int_FFT.fft d in
         let d2 = No_int_FFT.ifft d1 in
 
   d = d2)
