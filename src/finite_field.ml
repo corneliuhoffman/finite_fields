@@ -1,7 +1,7 @@
 (* note that x^128 + x^7 + x^2 + x + 1 is the definig polynomial for F*)
 (* let shift = Z.(~$135) *)
 
-(** 𝑥^8+𝑥^4+𝑥^3+𝑥+1 coresponds with 27 1 + 2 + 8 + 16 =*)
+(** x^64+x^4+x^3+𝑥+1 coresponds with 27 1 + 2 + 8 + 16 =*)
 
 (** ly(x^128 + x^7 + x^2 + x + 1 corrsponds to 1 +2 +4 + 128 =135, GF(2))*)
 
