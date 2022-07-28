@@ -26,3 +26,13 @@ $a_{4} := (a2sh) >>> 4$
 $a_{5} := a2sh+ (a\_{4}<<4)$
 
 $result :=\mbox{clmul}( ( a_{4}+a_{3}), (x^{4}+x^{3}+x+1)) + a\_{5}<<60 +b_1$
+
+## $GF(2^{128})$
+
+We represent elements of $GF(2^{128})$ as `int64*innt64`. Note that $(a,b)$ corresponds to $ax^{64} +b$ where $a,b$ are viewed as polynomials of degree less than 64 as in $GF(2^{64})$. The sign convention is as above. One notes that $x^{128}=x^7+x^2+𝑥+1=135$.
+
+Note that $(ax^{64} +b)(cx^{64} +d = acx^{128}+(ad+bc)x^{64} + bd = a\cdot c\cdot128+(a\cdot d+b\cdot c)x^{64} + b\cdot d$. We then keep reducing these using the fact that $x^{128} = 135$.
+
+Inverses are both computed using the binary algorithm (see for example algorithm 2.49 in `Guide to Elliptic Code Cryptography` by Hankerson Menezes and Vanstone).
+
+The additive FFT is based on [this paper](https://arxiv.org/abs/1404.3458v2).
