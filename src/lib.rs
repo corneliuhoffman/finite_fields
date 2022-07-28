@@ -1,32 +1,53 @@
-// #[cfg(all(
-//     feature = "clmul",
-//     target_arch = "x&86_64",
-//     target_feature = "sse2",
-//     target_feature = "pclmulqdq"
-// ))]
 
 use core::arch::x86_64::_mm_clmulepi64_si128;
-// use core::arch::x86_64::__m128i;
 use core::arch::x86_64::{
-    __m128i, _mm_and_si128, _mm_cvtsi64x_si128, _mm_extract_epi64, _mm_set_epi64x, _mm_xor_si128,
+    __m128i, _mm_and_si128, _mm_cvtsi64x_si128, _mm_extract_epi64, _mm_set_epi64x, _mm_xor_si128,_mm_srlv_epi64,_mm_sllv_epi64
 };
-
-// use std::time::{ Instant};
-//  use std::ops::BitXor;
-//   use core::arch::x86_64:: _mm_cvtsi128_si64,;
 #[ocaml::func]
 #[ocaml::sig("int64 -> int64-> int64-> int64  -> (int64 * int64)")]
 pub fn mul(a: i64, b: i64, c: i64, d: i64) -> (i64, i64) {
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     unsafe {
-        let (bd, _ad, _bc, _ac) = (
-            _mm_clmulepi64_si128(_mm_set_epi64x(a, b), _mm_set_epi64x(c, d), 0),
-            _mm_clmulepi64_si128(_mm_set_epi64x(a, b), _mm_set_epi64x(c, d), 1),
-            _mm_clmulepi64_si128(_mm_set_epi64x(a, b), _mm_set_epi64x(c, d), 16),
-            _mm_clmulepi64_si128(_mm_set_epi64x(a, b), _mm_set_epi64x(c, d), 17),
-        );
+        let bd
+            // , _ad, _bc, _ac) 
+            = 
+            
+            _mm_clmulepi64_si128(_mm_set_epi64x(a, b), _mm_set_epi64x(c, d), 0)
+            // _mm_clmulepi64_si128(_mm_set_epi64x(a, b), _mm_set_epi64x(c, d), 1),
+            // _mm_clmulepi64_si128(_mm_set_epi64x(a, b), _mm_set_epi64x(c, d), 16),
+            // _mm_clmulepi64_si128(_mm_set_epi64x(a, b), _mm_set_epi64x(c, d), 17),
+        ;
 
         (_mm_extract_epi64(bd, 0), _mm_extract_epi64(bd, 1))
+    }
+}
+
+pub fn  split(a: __m128i, count :__m128i) -> (__m128i, __m128i) {
+  unsafe{  let a1= _mm_srlv_epi64(a, count);
+    let b = _mm_sllv_epi64(a1, count);
+    let a2= _mm_xor_si128(a, b);
+    (a1,a2)}
+}
+#[ocaml::func]
+#[ocaml::sig("int64 -> int64->  int64 ")]
+pub fn mul64(a: i64, b: i64) -> i64 {
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    unsafe {
+        let sh =_mm_cvtsi64x_si128(27);
+        let a = _mm_cvtsi64x_si128(a);
+        let b= _mm_cvtsi64x_si128(b);
+        let ab = _mm_clmulepi64_si128(a,b,0);
+                    //    println!("ab= {:?}\n", ab);
+ 
+        let (b1, a1) = (_mm_extract_epi64(ab, 0), _mm_extract_epi64(ab, 1));
+
+        let (a2,a3) = split(_mm_cvtsi64x_si128(a1),_mm_cvtsi64x_si128(60)); 
+        let a2sh = _mm_clmulepi64_si128(a2, sh, 0);
+        let (a4,a5) = split(a2sh,_mm_cvtsi64x_si128(4) );
+        let res1 = _mm_clmulepi64_si128(_mm_xor_si128(a3,a4), sh, 0);
+        let res2 = _mm_xor_si128(res1, _mm_sllv_epi64(a5,_mm_cvtsi64x_si128(60)));
+        let res =_mm_xor_si128(res2, _mm_cvtsi64x_si128( b1)); 
+        _mm_extract_epi64(res, 0)
     }
 }
 
@@ -44,7 +65,6 @@ pub fn mulbyshift_x(number: __m128i) -> __m128i {
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     unsafe {
         let sh = _mm_cvtsi64x_si128(135);
-        // let number  = _mm_set_epi64x(a,b);
         let (bsh, ash) = (
             _mm_clmulepi64_si128(number, sh, 0),
             _mm_clmulepi64_si128(number, sh, 1),
@@ -184,23 +204,10 @@ pub fn inv(a: __m128i) -> __m128i {
                     _ => match (odd(u), odd(v)) {
                         (false, _) => {
                             let (new_u, new_g1) = reduce(u, g1);
-                            // let new_u = shift_right(u, 1);
-                            // let new_g1 = if odd(g1) {
-                            //     _mm_srli_epi64(g1, 1)
-                            // } else {
-                            //     addf(g1)
-                            // };
                             aux(new_u, v, new_g1, g2)
                         }
                         (_, false) => {
                             let (new_v, new_g2) = reduce(v, g2);
-
-                            // let new_v = shift_right(v, 1);
-                            // let new_g2 = if odd(g2) {
-                            //     _mm_srli_epi64(g2, 1)
-                            // } else {
-                            //     addf(g2)
-                            // };
                             aux(u, new_v, g1, new_g2)
                         }
                         _ => {

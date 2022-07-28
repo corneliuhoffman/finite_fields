@@ -1,4 +1,4 @@
-version=0.21.0
+version=0.23.0
 ocaml-version=4.12.1
 wrap-fun-args=false
 let-binding-spacing=compact
